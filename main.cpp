@@ -1,146 +1,137 @@
 #include <iostream>
 #include <mysql_driver.h>
 #include <mysql_connection.h>
-#include <cppconn/prepared_statement.h>
+#include <string>
 
 using namespace std;
 
 class StudyPlanner {
+public:
+    StudyPlanner();
+    void showMenu();
+
 private:
     sql::mysql::MySQL_Driver *driver;
     sql::Connection *con;
 
-public:
-    StudyPlanner() {
-        // Establish connection to MySQL
-        driver = sql::mysql::get_mysql_driver_instance();
-        con = driver->connect("tcp://127.0.0.1:3306", "your_username", "your_password");
-        con->setSchema("StudyPlanner");
-    }
-
-    ~StudyPlanner() {
-        delete con;
-    }
-
-    void addUser(string name, string preferredStudyTime, int breakInterval) {
-        sql::PreparedStatement *pstmt = con->prepareStatement("INSERT INTO User (Name, PreferredStudyTime, BreakInterval) VALUES (?, ?, ?)");
-        pstmt->setString(1, name);
-        pstmt->setString(2, preferredStudyTime);
-        pstmt->setInt(3, breakInterval);
-        pstmt->executeUpdate();
-        delete pstmt;
-        cout << "User added successfully.\n";
-    }
-
-    void addTask(int userId, string taskName, string deadline, int estimatedTime, int difficultyLevel) {
-        sql::PreparedStatement *pstmt = con->prepareStatement("INSERT INTO Task (UserID, TaskName, Deadline, EstimatedTime, DifficultyLevel) VALUES (?, ?, ?, ?, ?)");
-        pstmt->setInt(1, userId);
-        pstmt->setString(2, taskName);
-        pstmt->setString(3, deadline);
-        pstmt->setInt(4, estimatedTime);
-        pstmt->setInt(5, difficultyLevel);
-        pstmt->executeUpdate();
-        delete pstmt;
-        cout << "Task added successfully.\n";
-    }
-
-    void viewSchedule(int userId) {
-        sql::PreparedStatement *pstmt = con->prepareStatement("SELECT TaskName, StartTime, EndTime, IsCompleted FROM Schedule INNER JOIN Task ON Schedule.TaskID = Task.TaskID WHERE Schedule.UserID = ?");
-        pstmt->setInt(1, userId);
-        sql::ResultSet *res = pstmt->executeQuery();
-        
-        cout << "Schedule for User ID " << userId << ":\n";
-        while (res->next()) {
-            cout << "Task: " << res->getString("TaskName") 
-                 << ", Start Time: " << res->getString("StartTime") 
-                 << ", End Time: " << res->getString("EndTime") 
-                 << ", Completed: " << (res->getBoolean("IsCompleted") ? "Yes" : "No") << endl;
-        }
-        
-        delete res;
-        delete pstmt;
-    }
-
-    void trackProductivity(int userId, int taskId, int productivityScore, int timeSpent, string date) {
-        sql::PreparedStatement *pstmt = con->prepareStatement("INSERT INTO Productivity (UserID, TaskID, ProductivityScore, TimeSpent, Date) VALUES (?, ?, ?, ?, ?)");
-        pstmt->setInt(1, userId);
-        pstmt->setInt(2, taskId);
-        pstmt->setInt(3, productivityScore);
-        pstmt->setInt(4, timeSpent);
-        pstmt->setString(5, date);
-        pstmt->executeUpdate();
-        delete pstmt;
-        cout << "Productivity tracked successfully.\n";
-    }
+    void setupDatabase();
+    void addUser();
+    void addTask();
+    void viewSchedule();
 };
 
-int main() {
-    StudyPlanner planner;
+StudyPlanner::StudyPlanner() {
+    // Establish connection to MySQL
+    setupDatabase();
+}
+
+void StudyPlanner::setupDatabase() {
+    driver = sql::mysql::get_mysql_driver_instance();
+    con = driver->connect("tcp://127.0.0.1:3306", "your_username", "your_password");
+    con->setSchema("StudyPlanner");
+}
+
+void StudyPlanner::addUser() {
+    string name;
+    string preferredStudyTime;
+    int breakInterval;
+
+    cout << "Enter User Name: ";
+    cin >> name;
+    cout << "Enter Preferred Study Time: ";
+    cin >> preferredStudyTime;
+    cout << "Enter Break Interval (min): ";
+    cin >> breakInterval;
+
+    sql::PreparedStatement *pstmt = con->prepareStatement("INSERT INTO User (Name, PreferredStudyTime, BreakInterval) VALUES (?, ?, ?)");
+    pstmt->setString(1, name);
+    pstmt->setString(2, preferredStudyTime);
+    pstmt->setInt(3, breakInterval);
+    pstmt->executeUpdate();
+    delete pstmt;
+
+    cout << "User added successfully." << endl;
+}
+
+void StudyPlanner::addTask() {
+    int userId;
+    string taskName;
+    string deadline;
+    int estimatedTime;
+    int difficultyLevel;
+
+    cout << "Enter User ID: ";
+    cin >> userId;
+    cout << "Enter Task Name: ";
+    cin >> taskName;
+    cout << "Enter Deadline (YYYY-MM-DD): ";
+    cin >> deadline;
+    cout << "Enter Estimated Time (hrs): ";
+    cin >> estimatedTime;
+    cout << "Enter Difficulty Level (1-5): ";
+    cin >> difficultyLevel;
+
+    sql::PreparedStatement *pstmt = con->prepareStatement("INSERT INTO Task (UserID, TaskName, Deadline, EstimatedTime, DifficultyLevel) VALUES (?, ?, ?, ?, ?)");
+    pstmt->setInt(1, userId);
+    pstmt->setString(2, taskName);
+    pstmt->setString(3, deadline);
+    pstmt->setInt(4, estimatedTime);
+    pstmt->setInt(5, difficultyLevel);
+    pstmt->executeUpdate();
+    delete pstmt;
+
+    cout << "Task added successfully." << endl;
+}
+
+void StudyPlanner::viewSchedule() {
+    // Fetch and display the schedule from the database
+    sql::PreparedStatement *pstmt = con->prepareStatement("SELECT * FROM Task");
+    sql::ResultSet *res = pstmt->executeQuery();
     
+    cout << "Current Schedule:" << endl;
+    while (res->next()) {
+        cout << "UserID: " << res->getInt("UserID")
+             << ", Task: " << res->getString("TaskName")
+             << ", Deadline: " << res->getString("Deadline")
+             << ", Estimated Time: " << res->getInt("EstimatedTime")
+             << " hrs, Difficulty: " << res->getInt("DifficultyLevel") << endl;
+    }
+    delete res;
+    delete pstmt;
+}
+
+void StudyPlanner::showMenu() {
     int choice;
     do {
-        cout << "\n1. Add New User\n2. Add New Task\n3. View Schedule\n4. Track Productivity\n5. Exit\nEnter your choice: ";
+        cout << "\n--- Personalized Study Planner ---" << endl;
+        cout << "1. Add User" << endl;
+        cout << "2. Add Task" << endl;
+        cout << "3. View Schedule" << endl;
+        cout << "4. Exit" << endl;
+        cout << "Enter your choice: ";
         cin >> choice;
 
         switch (choice) {
-            case 1: {
-                string name, preferredStudyTime;
-                int breakInterval;
-                cout << "Enter Name: ";
-                cin >> name;
-                cout << "Enter Preferred Study Time: ";
-                cin >> preferredStudyTime;
-                cout << "Enter Break Interval (in minutes): ";
-                cin >> breakInterval;
-                planner.addUser(name, preferredStudyTime, breakInterval);
+            case 1:
+                addUser();
                 break;
-            }
-            case 2: {
-                int userId, estimatedTime, difficultyLevel;
-                string taskName, deadline;
-                cout << "Enter User ID: ";
-                cin >> userId;
-                cout << "Enter Task Name: ";
-                cin >> taskName;
-                cout << "Enter Deadline (YYYY-MM-DD): ";
-                cin >> deadline;
-                cout << "Enter Estimated Time (in hours): ";
-                cin >> estimatedTime;
-                cout << "Enter Difficulty Level (1-5): ";
-                cin >> difficultyLevel;
-                planner.addTask(userId, taskName, deadline, estimatedTime, difficultyLevel);
+            case 2:
+                addTask();
                 break;
-            }
-            case 3: {
-                int userId;
-                cout << "Enter User ID: ";
-                cin >> userId;
-                planner.viewSchedule(userId);
+            case 3:
+                viewSchedule();
                 break;
-            }
-            case 4: {
-                int userId, taskId, productivityScore, timeSpent;
-                string date;
-                cout << "Enter User ID: ";
-                cin >> userId;
-                cout << "Enter Task ID: ";
-                cin >> taskId;
-                cout << "Enter Productivity Score (1-5): ";
-                cin >> productivityScore;
-                cout << "Enter Time Spent (in hours): ";
-                cin >> timeSpent;
-                cout << "Enter Date (YYYY-MM-DD): ";
-                cin >> date;
-                planner.trackProductivity(userId, taskId, productivityScore, timeSpent, date);
-                break;
-            }
-            case 5:
-                cout << "Exiting...\n";
+            case 4:
+                cout << "Exiting..." << endl;
                 break;
             default:
-                cout << "Invalid choice, please try again.\n";
+                cout << "Invalid choice. Please try again." << endl;
         }
-    } while (choice != 5);
+    } while (choice != 4);
+}
 
+int main() {
+    StudyPlanner planner;
+    planner.showMenu();
     return 0;
 }
