@@ -1,0 +1,90 @@
+--- Personalized Study Planner ---
+1. Add User
+2. Add Task
+3. View Schedule
+4. Exit
+Enter your choice: 1
+Enter User Name: Alice
+Enter Preferred Study Time: 14:00
+Enter Break Interval (min): 30
+User added successfully.
+
+--- Personalized Study Planner ---
+1. Add User
+2. Add Task
+3. View Schedule
+4. Exit
+Enter your choice: 1
+Enter User Name: Bob
+Enter Preferred Study Time: 15:00
+Enter Break Interval (min): 25
+User added successfully.
+
+--- Personalized Study Planner ---
+1. Add User
+2. Add Task
+3. View Schedule
+4. Exit
+Enter your choice: 1
+Enter User Name: Charlie
+Enter Preferred Study Time: 10:00
+Enter Break Interval (min): 20
+User added successfully.
+
+--- Personalized Study Planner ---
+1. Add User
+2. Add Task
+3. View Schedule
+4. Exit
+Enter your choice: 2
+Enter User ID: 1
+Enter Task Name: Math Homework
+Enter Deadline (YYYY-MM-DD): 2024-10-10
+Enter Estimated Time (hrs): 2
+Enter Difficulty Level (1-5): 3
+Task added successfully.
+
+--- Personalized Study Planner ---
+1. Add User
+2. Add Task
+3. View Schedule
+4. Exit
+Enter your choice: 2
+Enter User ID: 2
+Enter Task Name: Science Project
+Enter Deadline (YYYY-MM-DD): 2024-10-15
+Enter Estimated Time (hrs): 4
+Enter Difficulty Level (1-5): 4
+Task added successfully.
+
+--- Personalized Study Planner ---
+1. Add User
+2. Add Task
+3. View Schedule
+4. Exit
+Enter your choice: 2
+Enter User ID: 3
+Enter Task Name: History Essay
+Enter Deadline (YYYY-MM-DD): 2024-10-12
+Enter Estimated Time (hrs): 3
+Enter Difficulty Level (1-5): 2
+Task added successfully.
+
+--- Personalized Study Planner ---
+1. Add User
+2. Add Task
+3. View Schedule
+4. Exit
+Enter your choice: 3
+Current Schedule:
+UserID: 1, Task: Math Homework, Deadline: 2024-10-10, Estimated Time: 2 hrs, Difficulty: 3
+UserID: 2, Task: Science Project, Deadline: 2024-10-15, Estimated Time: 4 hrs, Difficulty: 4
+UserID: 3, Task: History Essay, Deadline: 2024-10-12, Estimated Time: 3 hrs, Difficulty: 2
+
+--- Personalized Study Planner ---
+1. Add User
+2. Add Task
+3. View Schedule
+4. Exit
+Enter your choice: 4
+Exiting...
